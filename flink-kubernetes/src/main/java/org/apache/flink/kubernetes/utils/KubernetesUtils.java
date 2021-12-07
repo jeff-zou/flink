@@ -339,8 +339,33 @@ public class KubernetesUtils {
                         .addToLimits(Constants.RESOURCE_NAME_MEMORY, memQuantity)
                         .addToLimits(Constants.RESOURCE_NAME_CPU, cpuQuantity);
 
+        final String requestPrefix = "request.";
         // Add the external resources to resource requirement.
         for (Map.Entry<String, ExternalResource> externalResource : externalResources.entrySet()) {
+            final String configKey = externalResourceConfigKeys.get(externalResource.getKey());
+            if (StringUtils.isNullOrWhitespaceOnly(configKey)) {
+                continue;
+            }
+
+            final Quantity resourceQuantity =
+                new Quantity(
+                    String.valueOf(externalResource.getValue().getValue().longValue()));
+
+            if(configKey.startsWith(requestPrefix)){
+                resourceRequirementsBuilder
+                    .addToRequests(configKey.substring(requestPrefix.length()), resourceQuantity);
+            }else {
+                resourceRequirementsBuilder
+                    .addToLimits(configKey, resourceQuantity);
+            }
+
+            LOG.info(
+                "Request external resource {} with config key {}.",
+                resourceQuantity.getAmount(),
+                configKey);
+        }
+
+        /*for (Map.Entry<String, ExternalResource> externalResource : externalResources.entrySet()) {
             final String configKey = externalResourceConfigKeys.get(externalResource.getKey());
             if (!StringUtils.isNullOrWhitespaceOnly(configKey)) {
                 final Quantity resourceQuantity =
@@ -354,7 +379,7 @@ public class KubernetesUtils {
                         resourceQuantity.getAmount(),
                         configKey);
             }
-        }
+        }*/
 
         return resourceRequirementsBuilder.build();
     }
