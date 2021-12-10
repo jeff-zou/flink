@@ -270,6 +270,7 @@ public abstract class FlinkKafkaConsumerBase<T> extends RichParallelSourceFuncti
             Properties properties, OffsetCommitMode offsetCommitMode) {
         if (offsetCommitMode == OffsetCommitMode.ON_CHECKPOINTS
                 || offsetCommitMode == OffsetCommitMode.DISABLED) {
+            //取消自动提交offset
             properties.setProperty(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
         }
     }
@@ -802,6 +803,7 @@ public abstract class FlinkKafkaConsumerBase<T> extends RichParallelSourceFuncti
         //     instead of being built from `subscribedPartitionsToStartOffsets`
         //   - 'notifyCheckpointComplete' will start to do work (i.e. commit offsets to
         //     Kafka through the fetcher, if configured to do so)
+        // 根据checkpoint类型等生成kafkaFetcher
         this.kafkaFetcher =
                 createFetcher(
                         sourceContext,

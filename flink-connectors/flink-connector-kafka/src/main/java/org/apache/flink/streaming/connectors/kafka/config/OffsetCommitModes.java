@@ -40,6 +40,7 @@ public class OffsetCommitModes {
         if (enableCheckpointing) {
             // if checkpointing is enabled, the mode depends only on whether committing on
             // checkpoints is enabled
+            // setCommitOffsetsOnCheckPoints(true), 默认是在offset保存到checkpoint后也会向kafka提交offset
             return (enableCommitOnCheckpoint)
                     ? OffsetCommitMode.ON_CHECKPOINTS
                     : OffsetCommitMode.DISABLED;
