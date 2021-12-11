@@ -348,21 +348,20 @@ public class KubernetesUtils {
             }
 
             final Quantity resourceQuantity =
-                new Quantity(
-                    String.valueOf(externalResource.getValue().getValue().longValue()));
+                    new Quantity(
+                            String.valueOf(externalResource.getValue().getValue().longValue()));
 
-            if(configKey.startsWith(requestPrefix)){
-                resourceRequirementsBuilder
-                    .addToRequests(configKey.substring(requestPrefix.length()), resourceQuantity);
-            }else {
-                resourceRequirementsBuilder
-                    .addToLimits(configKey, resourceQuantity);
+            if (configKey.startsWith(requestPrefix)) {
+                resourceRequirementsBuilder.addToRequests(
+                        configKey.substring(requestPrefix.length()), resourceQuantity);
+            } else {
+                resourceRequirementsBuilder.addToLimits(configKey, resourceQuantity);
             }
 
             LOG.info(
-                "Request external resource {} with config key {}.",
-                resourceQuantity.getAmount(),
-                configKey);
+                    "Request external resource {} with config key {}.",
+                    resourceQuantity.getAmount(),
+                    configKey);
         }
 
         /*for (Map.Entry<String, ExternalResource> externalResource : externalResources.entrySet()) {
