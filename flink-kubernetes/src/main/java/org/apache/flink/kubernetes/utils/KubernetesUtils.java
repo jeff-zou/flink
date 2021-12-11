@@ -349,7 +349,7 @@ public class KubernetesUtils {
 
             final Quantity resourceQuantity =
                     new Quantity(
-                            String.valueOf(externalResource.getValue().getValue().longValue()));
+                            String.valueOf(externalResource.getValue().getValue()));
 
             if (configKey.startsWith(requestPrefix)) {
                 resourceRequirementsBuilder.addToRequests(
