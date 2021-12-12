@@ -116,8 +116,8 @@ under the License.
 		<scala.macros.version>2.1.1</scala.macros.version>
 		<!-- Default scala versions, must be overwritten by build profiles, so we set something
 		invalid here -->
-		<scala.version>2.11.12</scala.version>
-		<scala.binary.version>2.11</scala.binary.version>
+		<scala.version>2.12.7</scala.version>
+		<scala.binary.version>2.12</scala.binary.version>
 		<chill.version>0.7.6</chill.version>
 		<zookeeper.version>3.4.14</zookeeper.version>
 		<!-- Only the curator2 TestingServer works with ZK 3.4 -->
@@ -833,6 +833,7 @@ under the License.
 	</dependencyManagement>
 
 	<profiles>
+<!--
 		<profile>
 			<id>scala-2.11</id>
 			<properties>
@@ -844,15 +845,15 @@ under the License.
 					<name>!scala-2.12</name>
 				</property>
 			</activation>
-			<!-- Scala Shell doesn't currently work with Scala 2.12 so only include
-			when building for Scala 2.11. -->
+			&lt;!&ndash; Scala Shell doesn't currently work with Scala 2.12 so only include
+			when building for Scala 2.11. &ndash;&gt;
 			<modules>
 				<module>flink-scala-shell</module>
 			</modules>
 			<build>
 				<plugins>
-					<!-- make sure we don't have any _2.10 or _2.12 dependencies when building
-					for Scala 2.11 -->
+					&lt;!&ndash; make sure we don't have any _2.10 or _2.12 dependencies when building
+					for Scala 2.11 &ndash;&gt;
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-enforcer-plugin</artifactId>
@@ -879,6 +880,7 @@ under the License.
 			</build>
 		</profile>
 
+-->
 
 		<profile>
 			<id>scala-2.12</id>
