@@ -437,22 +437,22 @@ under the License.
 	</dependencies>
 
 	<profiles>
-		<profile>
-			<id>scala-2.11</id>
+	<!--	<profile>
+			<id>scala-2.12</id>
 			<activation>
 				<property>
-					<name>!scala-2.12</name>
+					<name>!scala-2.11</name>
 				</property>
 			</activation>
-			<!-- Scala Shell doesn't currently work with Scala 2.12 so only include
-			when building for Scala 2.11. -->
-			<dependencies>
+			&lt;!&ndash; Scala Shell doesn't currently work with Scala 2.12 so only include
+			when building for Scala 2.11. &ndash;&gt;
+&lt;!&ndash;			<dependencies>
 				<dependency>
 					<groupId>org.apache.flink</groupId>
 					<artifactId>flink-scala-shell_${scala.binary.version}</artifactId>
 					<version>${project.version}</version>
 				</dependency>
-			</dependencies>
+			</dependencies>&ndash;&gt;
 
 			<build>
 				<plugins>
@@ -460,14 +460,14 @@ under the License.
 						<artifactId>maven-assembly-plugin</artifactId>
 						<executions>
 							<execution>
-								<id>bin-scala2_11</id>
+								<id>bin-scala2_12</id>
 								<phase>package</phase>
 								<goals>
 									<goal>single</goal>
 								</goals>
 								<configuration>
 									<descriptors>
-										<descriptor>src/main/assemblies/bin-scala2_11.xml</descriptor>
+										<descriptor>src/main/assemblies/bin.xml</descriptor>
 									</descriptors>
 								</configuration>
 							</execution>
@@ -476,7 +476,7 @@ under the License.
 				</plugins>
 			</build>
 		</profile>
-
+-->
 		<profile>
 			<!-- Creates/Removes the 'build-target' symlink in the root directory (only Unix systems) -->
 			<id>symlink-build-target</id>
