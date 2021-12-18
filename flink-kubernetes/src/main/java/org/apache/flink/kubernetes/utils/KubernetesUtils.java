@@ -347,7 +347,7 @@ public class KubernetesUtils {
                 continue;
             }
 
-            //external resources 参数要求为long，先乘以10再除以10
+            //external resources 参数要求为long，先乘以10再除以10，
             final Quantity resourceQuantity =
                     new Quantity(
                             String.valueOf(
