@@ -1621,16 +1621,20 @@ public class CheckpointCoordinator {
                 savepointPointer,
                 (allowNonRestored ? "allowing non restored state" : ""));
 
-        final CompletedCheckpointStorageLocation checkpointLocation =
+        CompletedCheckpoint savepoint = null;
+        try {
+            final CompletedCheckpointStorageLocation checkpointLocation =
                 checkpointStorageView.resolveCheckpoint(savepointPointer);
 
-        // Load the savepoint as a checkpoint into the system
-        CompletedCheckpoint savepoint =
-                Checkpoints.loadAndValidateCheckpoint(
-                        job, tasks, checkpointLocation, userClassLoader, allowNonRestored);
+            // Load the savepoint as a checkpoint into the system
+            savepoint = Checkpoints.loadAndValidateCheckpoint(
+                job, tasks, checkpointLocation, userClassLoader, allowNonRestored);
+        } catch (FileNotFoundException e) {
+            LOG.info("savepoint file had deleted, file:{}", savepointPointer);
+            return false;
+        }
 
-        completedCheckpointStore.addCheckpoint(
-                savepoint, checkpointsCleaner, this::scheduleTriggerRequest);
+        completedCheckpointStore.addCheckpoint(savepoint, checkpointsCleaner, this::scheduleTriggerRequest);
 
         // Reset the checkpoint ID counter
         long nextCheckpointId = savepoint.getCheckpointID() + 1;
