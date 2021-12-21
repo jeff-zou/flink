@@ -22,6 +22,7 @@ import org.apache.flink.annotation.Internal;
 import org.apache.flink.connector.jdbc.internal.converter.JdbcRowConverter;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.api.ValidationException;
+import org.apache.flink.table.types.logical.LogicalType;
 import org.apache.flink.table.types.logical.RowType;
 
 import java.io.Serializable;
@@ -99,7 +100,12 @@ public interface JdbcDialect extends Serializable {
      *     of select + update/insert, this performance is poor.
      */
     default Optional<String> getUpsertStatement(
-            String tableName, String[] fieldNames, String[] uniqueKeyFields) {
+            String tableName, String[] fieldNames, int[] fieldTypes, String[] uniqueKeyFields, Boolean cumsum) {
+        return Optional.empty();
+    }
+
+    default Optional<String> getUpsertStatement(
+        String tableName, String[] fieldNames, LogicalType[] fieldTypes, String[] uniqueKeyFields, Boolean cumsum) {
         return Optional.empty();
     }
 

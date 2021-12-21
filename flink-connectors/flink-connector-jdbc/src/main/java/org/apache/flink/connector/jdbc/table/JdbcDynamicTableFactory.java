@@ -161,6 +161,9 @@ public class JdbcDynamicTableFactory implements DynamicTableSourceFactory, Dynam
                     .intType()
                     .defaultValue(3)
                     .withDescription("The max retry times if writing records to database failed.");
+    private static final ConfigOption<Boolean> SINK_CUMSUM =
+        ConfigOptions.key("sink.cumsum").booleanType().defaultValue(false).withDescription("cusum insert which not replace with on duplicate key update,eg: =values(col1)+col1");
+
 
     @Override
     public DynamicTableSink createDynamicTableSink(Context context) {
@@ -177,7 +180,7 @@ public class JdbcDynamicTableFactory implements DynamicTableSourceFactory, Dynam
         return new JdbcDynamicTableSink(
                 jdbcOptions,
                 getJdbcExecutionOptions(config),
-                getJdbcDmlOptions(jdbcOptions, physicalSchema),
+                getJdbcDmlOptions(jdbcOptions, physicalSchema, config),
                 physicalSchema);
     }
 
@@ -248,7 +251,7 @@ public class JdbcDynamicTableFactory implements DynamicTableSourceFactory, Dynam
         return builder.build();
     }
 
-    private JdbcDmlOptions getJdbcDmlOptions(JdbcOptions jdbcOptions, TableSchema schema) {
+    private JdbcDmlOptions getJdbcDmlOptions(JdbcOptions jdbcOptions, TableSchema schema, ReadableConfig config) {
         String[] keyFields =
                 schema.getPrimaryKey()
                         .map(pk -> pk.getColumns().toArray(new String[0]))
@@ -259,6 +262,7 @@ public class JdbcDynamicTableFactory implements DynamicTableSourceFactory, Dynam
                 .withDialect(jdbcOptions.getDialect())
                 .withFieldNames(schema.getFieldNames())
                 .withKeyFields(keyFields)
+                .withCumsum(config.get(SINK_CUMSUM))
                 .build();
     }
 
@@ -295,6 +299,7 @@ public class JdbcDynamicTableFactory implements DynamicTableSourceFactory, Dynam
         optionalOptions.add(SINK_MAX_RETRIES);
         optionalOptions.add(FactoryUtil.SINK_PARALLELISM);
         optionalOptions.add(MAX_RETRY_TIMEOUT);
+        optionalOptions.add(SINK_CUMSUM);
         return optionalOptions;
     }
 

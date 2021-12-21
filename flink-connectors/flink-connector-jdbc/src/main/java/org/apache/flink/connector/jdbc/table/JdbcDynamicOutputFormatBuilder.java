@@ -158,7 +158,8 @@ public class JdbcDynamicOutputFormatBuilder implements Serializable {
                         fieldTypes,
                         pkFields,
                         pkNames,
-                        pkTypes),
+                        pkTypes,
+                        opt.getCumsum()),
                 createDeleteExecutor(dialect, tableName, pkNames, pkTypes),
                 createRowKeyExtractor(fieldTypes, pkFields),
                 valueTransform);
@@ -187,8 +188,9 @@ public class JdbcDynamicOutputFormatBuilder implements Serializable {
             LogicalType[] fieldTypes,
             int[] pkFields,
             String[] pkNames,
-            LogicalType[] pkTypes) {
-        return dialect.getUpsertStatement(tableName, fieldNames, pkNames)
+            LogicalType[] pkTypes,
+            Boolean cumsum) {
+        return dialect.getUpsertStatement(tableName, fieldNames, fieldTypes, pkNames, cumsum)
                 .map(sql -> createSimpleRowExecutor(dialect, fieldNames, fieldTypes, sql))
                 .orElseGet(
                         () ->

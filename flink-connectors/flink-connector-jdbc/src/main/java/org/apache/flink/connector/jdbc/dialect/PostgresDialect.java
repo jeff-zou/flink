@@ -20,6 +20,7 @@ package org.apache.flink.connector.jdbc.dialect;
 
 import org.apache.flink.connector.jdbc.internal.converter.JdbcRowConverter;
 import org.apache.flink.connector.jdbc.internal.converter.PostgresRowConverter;
+import org.apache.flink.table.types.logical.LogicalType;
 import org.apache.flink.table.types.logical.LogicalTypeRoot;
 import org.apache.flink.table.types.logical.RowType;
 
@@ -66,24 +67,34 @@ public class PostgresDialect extends AbstractDialect {
     /** Postgres upsert query. It use ON CONFLICT ... DO UPDATE SET.. to replace into Postgres. */
     @Override
     public Optional<String> getUpsertStatement(
-            String tableName, String[] fieldNames, String[] uniqueKeyFields) {
-        String uniqueColumns =
-                Arrays.stream(uniqueKeyFields)
-                        .map(this::quoteIdentifier)
-                        .collect(Collectors.joining(", "));
-        String updateClause =
-                Arrays.stream(fieldNames)
-                        .map(f -> quoteIdentifier(f) + "=EXCLUDED." + quoteIdentifier(f))
-                        .collect(Collectors.joining(", "));
-        return Optional.of(
-                getInsertIntoStatement(tableName, fieldNames)
-                        + " ON CONFLICT ("
-                        + uniqueColumns
-                        + ")"
-                        + " DO UPDATE SET "
-                        + updateClause);
+            String tableName, String[] fieldNames, int[] fieldTypes, String[] uniqueKeyFields, Boolean cumsum) {
+        return getUpsertStatement(tableName, fieldNames, uniqueKeyFields);
     }
 
+    @Override
+    public Optional<String> getUpsertStatement(
+        String tableName, String[] fieldNames, LogicalType[] fieldTypes, String[] uniqueKeyFields, Boolean cumsum) {
+        return getUpsertStatement(tableName, fieldNames, uniqueKeyFields);
+    }
+
+    public Optional<String> getUpsertStatement(
+        String tableName, String[] fieldNames, String[] uniqueKeyFields) {
+        String uniqueColumns =
+            Arrays.stream(uniqueKeyFields)
+                .map(this::quoteIdentifier)
+                .collect(Collectors.joining(", "));
+        String updateClause =
+            Arrays.stream(fieldNames)
+                .map(f -> quoteIdentifier(f) + "=EXCLUDED." + quoteIdentifier(f))
+                .collect(Collectors.joining(", "));
+        return Optional.of(
+            getInsertIntoStatement(tableName, fieldNames)
+                + " ON CONFLICT ("
+                + uniqueColumns
+                + ")"
+                + " DO UPDATE SET "
+                + updateClause);
+    }
     @Override
     public String quoteIdentifier(String identifier) {
         return identifier;

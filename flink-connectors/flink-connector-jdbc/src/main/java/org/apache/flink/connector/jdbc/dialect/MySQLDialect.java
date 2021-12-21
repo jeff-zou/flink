@@ -20,12 +20,18 @@ package org.apache.flink.connector.jdbc.dialect;
 
 import org.apache.flink.connector.jdbc.internal.converter.JdbcRowConverter;
 import org.apache.flink.connector.jdbc.internal.converter.MySQLRowConverter;
+import org.apache.flink.table.types.logical.LogicalType;
+import org.apache.flink.table.types.logical.LogicalTypeFamily;
 import org.apache.flink.table.types.logical.LogicalTypeRoot;
 import org.apache.flink.table.types.logical.RowType;
 
+import java.util.HashSet;
+import java.util.Optional;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
+import java.util.ArrayList;
+import java.sql.Types;
 import java.util.stream.Collectors;
 
 /** JDBC dialect for MySQL. */
@@ -77,15 +83,62 @@ public class MySQLDialect extends AbstractDialect {
      */
     @Override
     public Optional<String> getUpsertStatement(
-            String tableName, String[] fieldNames, String[] uniqueKeyFields) {
-        String updateClause =
-                Arrays.stream(fieldNames)
-                        .map(f -> quoteIdentifier(f) + "=VALUES(" + quoteIdentifier(f) + ")")
-                        .collect(Collectors.joining(", "));
+            String tableName, String[] fieldNames, int[] fieldTypes, String[] uniqueKeyFields, Boolean cumsum) {
+        Boolean[] numericTypes =  Arrays.stream(fieldTypes).mapToObj(i->isNumericInt(i)).toArray(Boolean[]::new);;
+        String updateClause = getUpdateClause(fieldNames, numericTypes, uniqueKeyFields, cumsum);
+        return getUpsertStatement(tableName, fieldNames, updateClause);
+    }
+
+    @Override
+    public Optional<String> getUpsertStatement(
+        String tableName, String[] fieldNames, LogicalType[] fieldTypes, String[] uniqueKeyFields, Boolean cumsum) {
+        Boolean[] numericTypes = Arrays.stream(fieldTypes).map(i->isNumeric(i)).toArray(Boolean[]::new);
+        String updateClause = getUpdateClause(fieldNames, numericTypes, uniqueKeyFields, cumsum);
+        return getUpsertStatement(tableName, fieldNames, updateClause);
+    }
+
+    public String getUpdateClause(String[] fieldNames, Boolean[] numericTypes, String[] uniqueKeyFields, Boolean cumsum) {
+        if(cumsum){
+            return getCumsumStatement(numericTypes, fieldNames, uniqueKeyFields);
+        }else {
+            return Arrays.stream(fieldNames)
+                .map(f -> quoteIdentifier(f) + "=VALUES(" + quoteIdentifier(f) + ")")
+                .collect(Collectors.joining(", "));
+        }
+    }
+
+    public Optional<String> getUpsertStatement(
+        String tableName, String[] fieldNames, String updateClause) {
         return Optional.of(
-                getInsertIntoStatement(tableName, fieldNames)
-                        + " ON DUPLICATE KEY UPDATE "
-                        + updateClause);
+            getInsertIntoStatement(tableName, fieldNames)
+                + " ON DUPLICATE KEY UPDATE "
+                + updateClause);
+    }
+
+    public String getCumsumStatement(Boolean[] numericTypes, String[] fieldNames, String[] uniqueKeyFields) {
+        Set<String> set = new HashSet<String>(Arrays.asList(uniqueKeyFields));
+        List<String> res = new ArrayList<String>();
+
+        for(int i=0;i<fieldNames.length;i++){
+            if(!set.contains(fieldNames[i]) && numericTypes[i]){
+                res.add(quoteIdentifier(fieldNames[i]) + "=VALUES(" + quoteIdentifier(fieldNames[i]) + ") + " + quoteIdentifier(fieldNames[i]));
+            }else {
+                res.add(quoteIdentifier(fieldNames[i]) + "=VALUES(" + quoteIdentifier(fieldNames[i]) + ")");
+            }
+        }
+        return String.join(", ", res);
+    }
+
+    public Boolean isNumericInt(Integer fieldType) {
+        if (fieldType == Types.BIGINT || fieldType == Types.INTEGER || fieldType == Types.SMALLINT || fieldType == Types.TINYINT
+            || fieldType == Types.DOUBLE || fieldType == Types.FLOAT || fieldType == Types.DECIMAL) {
+            return true;
+        }
+        return false;
+    }
+
+    public Boolean isNumeric(LogicalType fieldType) {
+        return fieldType.getTypeRoot().getFamilies().contains(LogicalTypeFamily.NUMERIC);
     }
 
     @Override

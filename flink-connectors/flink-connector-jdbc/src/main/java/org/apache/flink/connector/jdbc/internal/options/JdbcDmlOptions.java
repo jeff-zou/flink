@@ -36,6 +36,7 @@ public class JdbcDmlOptions extends JdbcTypedQueryOptions {
     @Nullable private final String[] keyFields;
     private final String tableName;
     private final JdbcDialect dialect;
+    private final Boolean cumsum;
 
     public static JdbcDmlOptionsBuilder builder() {
         return new JdbcDmlOptionsBuilder();
@@ -46,12 +47,14 @@ public class JdbcDmlOptions extends JdbcTypedQueryOptions {
             JdbcDialect dialect,
             String[] fieldNames,
             int[] fieldTypes,
-            String[] keyFields) {
+            String[] keyFields,
+            Boolean cumsum) {
         super(fieldTypes);
         this.tableName = Preconditions.checkNotNull(tableName, "table is empty");
         this.dialect = Preconditions.checkNotNull(dialect, "dialect name is empty");
         this.fieldNames = Preconditions.checkNotNull(fieldNames, "field names is empty");
         this.keyFields = keyFields;
+        this.cumsum = cumsum;
     }
 
     public String getTableName() {
@@ -70,6 +73,10 @@ public class JdbcDmlOptions extends JdbcTypedQueryOptions {
         return Optional.ofNullable(keyFields);
     }
 
+    public Boolean getCumsum() {
+        return cumsum;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -82,12 +89,13 @@ public class JdbcDmlOptions extends JdbcTypedQueryOptions {
         return Arrays.equals(fieldNames, that.fieldNames)
                 && Arrays.equals(keyFields, that.keyFields)
                 && Objects.equals(tableName, that.tableName)
-                && Objects.equals(dialect, that.dialect);
+                && Objects.equals(dialect, that.dialect)
+                && Objects.equals(cumsum, that.cumsum);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(tableName, dialect);
+        int result = Objects.hash(tableName, dialect, cumsum);
         result = 31 * result + Arrays.hashCode(fieldNames);
         result = 31 * result + Arrays.hashCode(keyFields);
         return result;
@@ -100,6 +108,7 @@ public class JdbcDmlOptions extends JdbcTypedQueryOptions {
         private String[] fieldNames;
         private String[] keyFields;
         private JdbcDialect dialect;
+        private Boolean cumsum;
 
         @Override
         protected JdbcDmlOptionsBuilder self() {
@@ -131,13 +140,18 @@ public class JdbcDmlOptions extends JdbcTypedQueryOptions {
             return self();
         }
 
+        public JdbcDmlOptionsBuilder withCumsum(Boolean cumsum) {
+            this.cumsum = cumsum;
+            return  this;
+        }
+
         public JdbcDmlOptionsBuilder withDialect(JdbcDialect dialect) {
             this.dialect = dialect;
             return self();
         }
 
         public JdbcDmlOptions build() {
-            return new JdbcDmlOptions(tableName, dialect, fieldNames, fieldTypes, keyFields);
+            return new JdbcDmlOptions(tableName, dialect, fieldNames, fieldTypes, keyFields, cumsum);
         }
 
         static String[] concat(String first, String... next) {

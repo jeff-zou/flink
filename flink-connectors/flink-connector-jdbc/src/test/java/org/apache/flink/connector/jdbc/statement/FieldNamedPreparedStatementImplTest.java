@@ -23,6 +23,7 @@ import org.apache.flink.connector.jdbc.dialect.JdbcDialects;
 
 import org.junit.Test;
 
+import java.sql.Types;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,9 +40,11 @@ public class FieldNamedPreparedStatementImplTest {
                     .orElseThrow(() -> new RuntimeException("Unsupported dialect."));
     private final String[] fieldNames =
             new String[] {"id", "name", "email", "ts", "field1", "field_2", "__field_3__"};
+    private final int[] fieldTypes =
+        new int[] {Types.BIGINT, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
     private final String[] keyFields = new String[] {"id", "__field_3__"};
     private final String tableName = "tbl";
-
+    private final Boolean cumsum = false;
     @Test
     public void testInsertStatement() {
         String insertStmt = dialect.getInsertIntoStatement(tableName, fieldNames);
@@ -108,7 +111,7 @@ public class FieldNamedPreparedStatementImplTest {
 
     @Test
     public void testUpsertStatement() {
-        String upsertStmt = dialect.getUpsertStatement(tableName, fieldNames, keyFields).get();
+        String upsertStmt = dialect.getUpsertStatement(tableName, fieldNames, fieldTypes, keyFields, cumsum).get();
         assertEquals(
                 "INSERT INTO `tbl`(`id`, `name`, `email`, `ts`, `field1`, `field_2`, `__field_3__`) "
                         + "VALUES (:id, :name, :email, :ts, :field1, :field_2, :__field_3__) "
