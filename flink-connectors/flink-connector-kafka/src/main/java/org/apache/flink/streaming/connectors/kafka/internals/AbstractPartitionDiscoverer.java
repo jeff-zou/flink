@@ -199,7 +199,7 @@ public abstract class AbstractPartitionDiscoverer {
     public boolean setAndCheckDiscoveredPartition(KafkaTopicPartition partition) {
         if (isUndiscoveredPartition(partition)) {
             discoveredPartitions.add(partition);
-
+            // 通过判断取模后的值来确定该分区是否属于当前子任务
             return KafkaTopicPartitionAssigner.assign(partition, numParallelSubtasks)
                     == indexOfThisSubtask;
         }

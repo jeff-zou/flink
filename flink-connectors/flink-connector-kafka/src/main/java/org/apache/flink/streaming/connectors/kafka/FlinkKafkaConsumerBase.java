@@ -120,7 +120,9 @@ public abstract class FlinkKafkaConsumerBase<T> extends RichParallelSourceFuncti
     //  configuration state, set on the client relevant for all subtasks
     // ------------------------------------------------------------------------
 
-    /** Describes whether we are discovering partitions for fixed topics or a topic pattern. */
+    /** Describes whether we are discovering partitions for fixed topics or a topic pattern.
+     * topic
+     * */
     private final KafkaTopicsDescriptor topicsDescriptor;
 
     /** The schema to convert between Kafka's byte messages, and Flink's objects. */
@@ -184,6 +186,9 @@ public abstract class FlinkKafkaConsumerBase<T> extends RichParallelSourceFuncti
     private transient volatile AbstractFetcher<T, ?> kafkaFetcher;
 
     /** The partition discoverer, used to find new partitions. */
+    /**
+     * 分区发现
+     */
     private transient volatile AbstractPartitionDiscoverer partitionDiscoverer;
 
     /**
@@ -570,15 +575,19 @@ public abstract class FlinkKafkaConsumerBase<T> extends RichParallelSourceFuncti
         this.partitionDiscoverer =
                 createPartitionDiscoverer(
                         topicsDescriptor,
+                        //子任务 并行度id
                         getRuntimeContext().getIndexOfThisSubtask(),
+                        //子任务并发度
                         getRuntimeContext().getNumberOfParallelSubtasks());
         this.partitionDiscoverer.open();
 
         subscribedPartitionsToStartOffsets = new HashMap<>();
+        //获得所有分区
         final List<KafkaTopicPartition> allPartitions = partitionDiscoverer.discoverPartitions();
         if (restoredState != null) {
             for (KafkaTopicPartition partition : allPartitions) {
                 if (!restoredState.containsKey(partition)) {
+                    //当使用了savepoint 但这个分区却不在savepoint里时 会从这个分区的earliest开始消费
                     restoredState.put(partition, KafkaTopicPartitionStateSentinel.EARLIEST_OFFSET);
                 }
             }
