@@ -137,6 +137,8 @@ public class KafkaDynamicSource
     /** Flag to determine source mode. In upsert mode, it will keep the tombstone message. * */
     protected final boolean upsertMode;
 
+    protected Integer parallelism;
+
     public KafkaDynamicSource(
             DataType physicalDataType,
             @Nullable DecodingFormat<DeserializationSchema<RowData>> keyDecodingFormat,
@@ -150,7 +152,8 @@ public class KafkaDynamicSource
             StartupMode startupMode,
             Map<KafkaTopicPartition, Long> specificStartupOffsets,
             long startupTimestampMillis,
-            boolean upsertMode) {
+            boolean upsertMode,
+            @Nullable Integer parallelism) {
         // Format attributes
         this.physicalDataType =
                 Preconditions.checkNotNull(
@@ -183,6 +186,7 @@ public class KafkaDynamicSource
                         specificStartupOffsets, "Specific offsets must not be null.");
         this.startupTimestampMillis = startupTimestampMillis;
         this.upsertMode = upsertMode;
+        this.parallelism = parallelism;
     }
 
     @Override
@@ -204,7 +208,7 @@ public class KafkaDynamicSource
         final FlinkKafkaConsumer<RowData> kafkaConsumer =
                 createKafkaConsumer(keyDeserialization, valueDeserialization, producedTypeInfo);
 
-        return SourceFunctionProvider.of(kafkaConsumer, false);
+        return SourceFunctionProvider.of(kafkaConsumer, false, parallelism);
     }
 
     @Override
@@ -272,7 +276,8 @@ public class KafkaDynamicSource
                         startupMode,
                         specificStartupOffsets,
                         startupTimestampMillis,
-                        upsertMode);
+                        upsertMode,
+                        parallelism);
         copy.producedDataType = producedDataType;
         copy.metadataKeys = metadataKeys;
         copy.watermarkStrategy = watermarkStrategy;
@@ -308,7 +313,8 @@ public class KafkaDynamicSource
                 && Objects.equals(specificStartupOffsets, that.specificStartupOffsets)
                 && startupTimestampMillis == that.startupTimestampMillis
                 && Objects.equals(upsertMode, that.upsertMode)
-                && Objects.equals(watermarkStrategy, that.watermarkStrategy);
+                && Objects.equals(watermarkStrategy, that.watermarkStrategy)
+                && Objects.equals(parallelism, that.parallelism);
     }
 
     @Override
@@ -329,7 +335,8 @@ public class KafkaDynamicSource
                 specificStartupOffsets,
                 startupTimestampMillis,
                 upsertMode,
-                watermarkStrategy);
+                watermarkStrategy,
+                parallelism);
     }
 
     // --------------------------------------------------------------------------------------------
