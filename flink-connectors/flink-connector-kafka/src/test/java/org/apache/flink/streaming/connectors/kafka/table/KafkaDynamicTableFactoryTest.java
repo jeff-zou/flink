@@ -205,7 +205,8 @@ public class KafkaDynamicTableFactoryTest extends TestLogger {
                         KAFKA_SOURCE_PROPERTIES,
                         StartupMode.SPECIFIC_OFFSETS,
                         specificOffsets,
-                        0);
+                        0,
+                        specificOffsets.size());
         assertEquals(actualKafkaSource, expectedKafkaSource);
 
         // Test Kafka consumer
@@ -275,7 +276,8 @@ public class KafkaDynamicTableFactoryTest extends TestLogger {
                         KAFKA_SOURCE_PROPERTIES,
                         StartupMode.EARLIEST,
                         specificOffsets,
-                        0);
+                        0,
+                        1);
         final KafkaDynamicSource actualKafkaSource = (KafkaDynamicSource) actualSource;
         assertEquals(actualKafkaSource, expectedKafkaSource);
 
@@ -320,7 +322,8 @@ public class KafkaDynamicTableFactoryTest extends TestLogger {
                         KAFKA_FINAL_SOURCE_PROPERTIES,
                         StartupMode.GROUP_OFFSETS,
                         Collections.emptyMap(),
-                        0);
+                        0,
+                        1);
 
         assertEquals(actualSource, expectedKafkaSource);
     }
@@ -371,7 +374,8 @@ public class KafkaDynamicTableFactoryTest extends TestLogger {
                         KAFKA_FINAL_SOURCE_PROPERTIES,
                         StartupMode.GROUP_OFFSETS,
                         Collections.emptyMap(),
-                        0);
+                        0,
+                        1);
         expectedKafkaSource.producedDataType = SCHEMA_WITH_METADATA.toSourceRowDataType();
         expectedKafkaSource.metadataKeys = Collections.singletonList("timestamp");
 
@@ -855,7 +859,8 @@ public class KafkaDynamicTableFactoryTest extends TestLogger {
             Properties properties,
             StartupMode startupMode,
             Map<KafkaTopicPartition, Long> specificStartupOffsets,
-            long startupTimestampMillis) {
+            long startupTimestampMillis,
+            Integer parallelism) {
         return new KafkaDynamicSource(
                 physicalDataType,
                 keyDecodingFormat,
@@ -869,7 +874,8 @@ public class KafkaDynamicTableFactoryTest extends TestLogger {
                 startupMode,
                 specificStartupOffsets,
                 startupTimestampMillis,
-                false);
+                false,
+                parallelism);
     }
 
     private static KafkaDynamicSink createExpectedSink(

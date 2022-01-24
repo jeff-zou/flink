@@ -64,6 +64,7 @@ import static org.apache.flink.streaming.connectors.kafka.table.KafkaOptions.aut
 import static org.apache.flink.streaming.connectors.kafka.table.KafkaOptions.createKeyFormatProjection;
 import static org.apache.flink.streaming.connectors.kafka.table.KafkaOptions.createValueFormatProjection;
 import static org.apache.flink.streaming.connectors.kafka.table.KafkaOptions.getKafkaProperties;
+import static org.apache.flink.table.factories.FactoryUtil.SOURCE_PARALLELISM;
 
 /** Upsert-Kafka factory. */
 public class UpsertKafkaDynamicTableFactory
@@ -119,6 +120,8 @@ public class UpsertKafkaDynamicTableFactory
         // always use earliest to keep data integrity
         StartupMode earliest = StartupMode.EARLIEST;
 
+        final Integer parallelism = tableOptions.getOptional(SOURCE_PARALLELISM).orElse(null);
+
         return new KafkaDynamicSource(
                 schema.toPhysicalRowDataType(),
                 keyDecodingFormat,
@@ -132,7 +135,8 @@ public class UpsertKafkaDynamicTableFactory
                 earliest,
                 Collections.emptyMap(),
                 0,
-                true);
+                true,
+                parallelism);
     }
 
     @Override
