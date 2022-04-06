@@ -107,7 +107,7 @@ under the License.
 		<akka.version>2.5.21</akka.version>
 		<target.java.version>1.8</target.java.version>
 		<slf4j.version>1.7.15</slf4j.version>
-		<log4j.version>2.12.1</log4j.version>
+		<log4j.version>2.17.1</log4j.version>
 		<!-- Overwrite default values from parent pom.
 			 Intellij is (sometimes?) using those values to choose target language level
 			 and thus is changing back to java 1.6 on each maven re-import -->
@@ -154,7 +154,7 @@ under the License.
 			For Hadoop 2.7, the minor Hadoop version supported for flink-shaded-hadoop-2-uber is 2.7.5
 		-->
 		<hivemetastore.hadoop.version>2.7.5</hivemetastore.hadoop.version>
-		<japicmp.referenceVersion>1.13.3</japicmp.referenceVersion>
+		<japicmp.referenceVersion>1.13.6</japicmp.referenceVersion>
 		<japicmp.outputDir>tools/japicmp-output</japicmp.outputDir>
 		<spotless.version>2.4.2</spotless.version>
 
@@ -492,14 +492,14 @@ under the License.
 				<!-- mockito/powermock mismatch -->
 				<groupId>net.bytebuddy</groupId>
 				<artifactId>byte-buddy</artifactId>
-				<version>1.8.15</version>
+				<version>1.8.22</version>
 			</dependency>
 
 			<dependency>
 				<!-- mockito/powermock mismatch -->
 				<groupId>net.bytebuddy</groupId>
 				<artifactId>byte-buddy-agent</artifactId>
-				<version>1.8.15</version>
+				<version>1.8.22</version>
 			</dependency>
 
 			<!-- For dependency convergence -->
@@ -1600,7 +1600,7 @@ under the License.
 						<!--suppress MavenModelInspection -->
 						<test.randomization.seed>${test.randomization.seed}</test.randomization.seed>
 					</systemPropertyVariables>
-					<argLine>-Xms256m -Xmx2048m -Dmvn.forkNumber=${surefire.forkNumber} -XX:+UseG1GC</argLine>
+					<argLine>-Xms256m -Xmx2048m -Dmvn.forkNumber=${surefire.forkNumber} -XX:+UseG1GC -Duser.country=US -Duser.language=en</argLine>
 				</configuration>
 				<executions>
 					<!--execute all the unit tests-->
