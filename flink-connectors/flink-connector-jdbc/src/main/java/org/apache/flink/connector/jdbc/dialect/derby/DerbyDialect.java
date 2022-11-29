@@ -69,7 +69,11 @@ class DerbyDialect extends AbstractDialect {
 
     @Override
     public Optional<String> getUpsertStatement(
-            String tableName, String[] fieldNames, String[] uniqueKeyFields) {
+            String tableName,
+            String[] fieldNames,
+            int[] fieldTypes,
+            String[] uniqueKeyFields,
+            boolean cumulative) {
         return Optional.empty();
     }
 

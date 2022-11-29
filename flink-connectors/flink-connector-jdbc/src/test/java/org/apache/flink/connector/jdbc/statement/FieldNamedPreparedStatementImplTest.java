@@ -23,6 +23,7 @@ import org.apache.flink.connector.jdbc.dialect.JdbcDialectLoader;
 
 import org.junit.Test;
 
+import java.sql.Types;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,16 @@ public class FieldNamedPreparedStatementImplTest {
     private final JdbcDialect dialect = JdbcDialectLoader.load("jdbc:mysql://localhost:3306/test");
     private final String[] fieldNames =
             new String[] {"id", "name", "email", "ts", "field1", "field_2", "__field_3__"};
+    private final int[] fieldTypes =
+            new int[] {
+                Types.VARCHAR,
+                Types.VARCHAR,
+                Types.VARCHAR,
+                Types.VARCHAR,
+                Types.VARCHAR,
+                Types.VARCHAR,
+                Types.VARCHAR
+            };
     private final String[] keyFields = new String[] {"id", "__field_3__"};
     private final String tableName = "tbl";
 
@@ -106,7 +117,9 @@ public class FieldNamedPreparedStatementImplTest {
 
     @Test
     public void testUpsertStatement() {
-        String upsertStmt = dialect.getUpsertStatement(tableName, fieldNames, keyFields).get();
+        String upsertStmt =
+                dialect.getUpsertStatement(tableName, fieldNames, fieldTypes, keyFields, false)
+                        .get();
         assertEquals(
                 "INSERT INTO `tbl`(`id`, `name`, `email`, `ts`, `field1`, `field_2`, `__field_3__`) "
                         + "VALUES (:id, :name, :email, :ts, :field1, :field_2, :__field_3__) "

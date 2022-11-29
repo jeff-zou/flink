@@ -60,6 +60,7 @@ import static org.apache.flink.connector.jdbc.table.JdbcConnectorOptions.SCAN_PA
 import static org.apache.flink.connector.jdbc.table.JdbcConnectorOptions.SCAN_PARTITION_UPPER_BOUND;
 import static org.apache.flink.connector.jdbc.table.JdbcConnectorOptions.SINK_BUFFER_FLUSH_INTERVAL;
 import static org.apache.flink.connector.jdbc.table.JdbcConnectorOptions.SINK_BUFFER_FLUSH_MAX_ROWS;
+import static org.apache.flink.connector.jdbc.table.JdbcConnectorOptions.SINK_CUMULATIVE;
 import static org.apache.flink.connector.jdbc.table.JdbcConnectorOptions.SINK_MAX_RETRIES;
 import static org.apache.flink.connector.jdbc.table.JdbcConnectorOptions.SINK_PARALLELISM;
 import static org.apache.flink.connector.jdbc.table.JdbcConnectorOptions.TABLE_NAME;
@@ -92,7 +93,8 @@ public class JdbcDynamicTableFactory implements DynamicTableSourceFactory, Dynam
                 getJdbcDmlOptions(
                         jdbcOptions,
                         context.getPhysicalRowDataType(),
-                        context.getPrimaryKeyIndexes()),
+                        context.getPrimaryKeyIndexes(),
+                        config),
                 context.getPhysicalRowDataType());
     }
 
@@ -166,7 +168,10 @@ public class JdbcDynamicTableFactory implements DynamicTableSourceFactory, Dynam
     }
 
     private JdbcDmlOptions getJdbcDmlOptions(
-            JdbcConnectorOptions jdbcOptions, DataType dataType, int[] primaryKeyIndexes) {
+            JdbcConnectorOptions jdbcOptions,
+            DataType dataType,
+            int[] primaryKeyIndexes,
+            ReadableConfig config) {
 
         String[] keyFields =
                 Arrays.stream(primaryKeyIndexes)
@@ -178,6 +183,7 @@ public class JdbcDynamicTableFactory implements DynamicTableSourceFactory, Dynam
                 .withDialect(jdbcOptions.getDialect())
                 .withFieldNames(DataType.getFieldNames(dataType).toArray(new String[0]))
                 .withKeyFields(keyFields.length > 0 ? keyFields : null)
+                .withCumulative(config.get(SINK_CUMULATIVE))
                 .build();
     }
 
@@ -215,6 +221,7 @@ public class JdbcDynamicTableFactory implements DynamicTableSourceFactory, Dynam
         optionalOptions.add(SINK_MAX_RETRIES);
         optionalOptions.add(SINK_PARALLELISM);
         optionalOptions.add(MAX_RETRY_TIMEOUT);
+        optionalOptions.add(SINK_CUMULATIVE);
         return optionalOptions;
     }
 
@@ -235,7 +242,8 @@ public class JdbcDynamicTableFactory implements DynamicTableSourceFactory, Dynam
                         LOOKUP_CACHE_MAX_ROWS,
                         LOOKUP_CACHE_TTL,
                         LOOKUP_MAX_RETRIES,
-                        LOOKUP_CACHE_MISSING_KEY)
+                        LOOKUP_CACHE_MISSING_KEY,
+                        SINK_CUMULATIVE)
                 .collect(Collectors.toSet());
     }
 

@@ -36,6 +36,7 @@ public class JdbcDmlOptions extends JdbcTypedQueryOptions {
     @Nullable private final String[] keyFields;
     private final String tableName;
     private final JdbcDialect dialect;
+    private final boolean cumulative;
 
     public static JdbcDmlOptionsBuilder builder() {
         return new JdbcDmlOptionsBuilder();
@@ -46,12 +47,14 @@ public class JdbcDmlOptions extends JdbcTypedQueryOptions {
             JdbcDialect dialect,
             String[] fieldNames,
             int[] fieldTypes,
-            String[] keyFields) {
+            String[] keyFields,
+            boolean cumulative) {
         super(fieldTypes);
         this.tableName = Preconditions.checkNotNull(tableName, "table is empty");
         this.dialect = Preconditions.checkNotNull(dialect, "dialect is empty");
         this.fieldNames = Preconditions.checkNotNull(fieldNames, "field names is empty");
         this.keyFields = keyFields;
+        this.cumulative = cumulative;
     }
 
     public String getTableName() {
@@ -64,6 +67,10 @@ public class JdbcDmlOptions extends JdbcTypedQueryOptions {
 
     public String[] getFieldNames() {
         return fieldNames;
+    }
+
+    public boolean isCumulative() {
+        return cumulative;
     }
 
     public Optional<String[]> getKeyFields() {
@@ -82,7 +89,8 @@ public class JdbcDmlOptions extends JdbcTypedQueryOptions {
         return Arrays.equals(fieldNames, that.fieldNames)
                 && Arrays.equals(keyFields, that.keyFields)
                 && Objects.equals(tableName, that.tableName)
-                && Objects.equals(dialect.dialectName(), that.dialect.dialectName());
+                && Objects.equals(dialect.dialectName(), that.dialect.dialectName())
+                && Objects.equals(cumulative, that.cumulative);
     }
 
     @Override
@@ -100,6 +108,7 @@ public class JdbcDmlOptions extends JdbcTypedQueryOptions {
         private String[] fieldNames;
         private String[] keyFields;
         private JdbcDialect dialect;
+        private boolean cumulative;
 
         @Override
         protected JdbcDmlOptionsBuilder self() {
@@ -136,8 +145,14 @@ public class JdbcDmlOptions extends JdbcTypedQueryOptions {
             return self();
         }
 
+        public JdbcDmlOptionsBuilder withCumulative(boolean cumulative) {
+            this.cumulative = cumulative;
+            return self();
+        }
+
         public JdbcDmlOptions build() {
-            return new JdbcDmlOptions(tableName, dialect, fieldNames, fieldTypes, keyFields);
+            return new JdbcDmlOptions(
+                    tableName, dialect, fieldNames, fieldTypes, keyFields, cumulative);
         }
 
         static String[] concat(String first, String... next) {

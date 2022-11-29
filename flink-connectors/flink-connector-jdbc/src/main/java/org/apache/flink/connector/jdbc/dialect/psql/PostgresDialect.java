@@ -63,7 +63,11 @@ public class PostgresDialect extends AbstractDialect {
     /** Postgres upsert query. It use ON CONFLICT ... DO UPDATE SET.. to replace into Postgres. */
     @Override
     public Optional<String> getUpsertStatement(
-            String tableName, String[] fieldNames, String[] uniqueKeyFields) {
+            String tableName,
+            String[] fieldNames,
+            int[] fieldTypes,
+            String[] uniqueKeyFields,
+            boolean cumulative) {
         String uniqueColumns =
                 Arrays.stream(uniqueKeyFields)
                         .map(this::quoteIdentifier)

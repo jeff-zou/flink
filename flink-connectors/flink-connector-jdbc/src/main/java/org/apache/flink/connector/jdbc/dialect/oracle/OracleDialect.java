@@ -72,7 +72,11 @@ class OracleDialect extends AbstractDialect {
 
     @Override
     public Optional<String> getUpsertStatement(
-            String tableName, String[] fieldNames, String[] uniqueKeyFields) {
+            String tableName,
+            String[] fieldNames,
+            int[] fieldTypes,
+            String[] uniqueKeyFields,
+            boolean cumulative) {
 
         String sourceFields =
                 Arrays.stream(fieldNames)

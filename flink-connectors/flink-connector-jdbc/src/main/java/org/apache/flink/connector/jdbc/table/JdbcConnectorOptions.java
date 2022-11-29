@@ -165,5 +165,12 @@ public class JdbcConnectorOptions {
                     .defaultValue(3)
                     .withDescription("The max retry times if writing records to database failed.");
 
+    public static final ConfigOption<Boolean> SINK_CUMULATIVE =
+            ConfigOptions.key("sink.cumulative")
+                    .booleanType()
+                    .defaultValue(false)
+                    .withDescription(
+                            "cumulative insert which not replace with on duplicate key update,eg: =values(col1)+col1");
+
     private JdbcConnectorOptions() {}
 }

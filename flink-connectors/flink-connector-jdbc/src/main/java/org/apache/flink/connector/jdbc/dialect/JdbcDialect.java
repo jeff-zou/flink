@@ -21,6 +21,7 @@ package org.apache.flink.connector.jdbc.dialect;
 import org.apache.flink.annotation.PublicEvolving;
 import org.apache.flink.connector.jdbc.converter.JdbcRowConverter;
 import org.apache.flink.table.api.ValidationException;
+import org.apache.flink.table.types.logical.LogicalType;
 import org.apache.flink.table.types.logical.RowType;
 
 import java.io.Serializable;
@@ -96,7 +97,28 @@ public interface JdbcDialect extends Serializable {
      * @return The upsert statement if supported, otherwise None.
      */
     Optional<String> getUpsertStatement(
-            String tableName, String[] fieldNames, String[] uniqueKeyFields);
+            String tableName,
+            String[] fieldNames,
+            int[] fieldTypes,
+            String[] uniqueKeyFields,
+            boolean cumulative);
+
+    /**
+     * @param tableName
+     * @param fieldNames
+     * @param fieldTypes
+     * @param uniqueKeyFields
+     * @param cumulative
+     * @return
+     */
+    default Optional<String> getUpsertStatement(
+            String tableName,
+            String[] fieldNames,
+            LogicalType[] fieldTypes,
+            String[] uniqueKeyFields,
+            boolean cumulative) {
+        return Optional.empty();
+    }
 
     /**
      * Generates a query to determine if a row exists in the table. The returned string will be used

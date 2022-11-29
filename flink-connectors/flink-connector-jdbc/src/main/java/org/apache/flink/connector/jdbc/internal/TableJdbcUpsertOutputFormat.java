@@ -164,7 +164,11 @@ class TableJdbcUpsertOutputFormat
 
         return opt.getDialect()
                 .getUpsertStatement(
-                        opt.getTableName(), opt.getFieldNames(), opt.getKeyFields().get())
+                        opt.getTableName(),
+                        opt.getFieldNames(),
+                        opt.getFieldTypes(),
+                        opt.getKeyFields().get(),
+                        opt.isCumulative())
                 .map(
                         sql ->
                                 createSimpleRowExecutor(

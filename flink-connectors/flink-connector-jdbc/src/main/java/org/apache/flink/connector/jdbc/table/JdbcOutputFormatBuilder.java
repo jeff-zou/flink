@@ -156,7 +156,8 @@ public class JdbcOutputFormatBuilder implements Serializable {
                         fieldTypes,
                         pkFields,
                         pkNames,
-                        pkTypes),
+                        pkTypes,
+                        opt.isCumulative()),
                 createDeleteExecutor(dialect, tableName, pkNames, pkTypes),
                 createRowKeyExtractor(fieldTypes, pkFields),
                 valueTransform);
@@ -185,8 +186,9 @@ public class JdbcOutputFormatBuilder implements Serializable {
             LogicalType[] fieldTypes,
             int[] pkFields,
             String[] pkNames,
-            LogicalType[] pkTypes) {
-        return dialect.getUpsertStatement(tableName, fieldNames, pkNames)
+            LogicalType[] pkTypes,
+            boolean cumulative) {
+        return dialect.getUpsertStatement(tableName, fieldNames, fieldTypes, pkNames, cumulative)
                 .map(sql -> createSimpleRowExecutor(dialect, fieldNames, fieldTypes, sql))
                 .orElseGet(
                         () ->
