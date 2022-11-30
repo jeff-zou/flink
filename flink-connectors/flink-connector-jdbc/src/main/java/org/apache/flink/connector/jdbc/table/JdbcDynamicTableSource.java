@@ -36,6 +36,7 @@ import org.apache.flink.table.connector.source.abilities.SupportsProjectionPushD
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.table.types.logical.RowType;
 import org.apache.flink.util.Preconditions;
+import org.apache.flink.util.StringUtils;
 
 import java.util.Objects;
 
@@ -102,27 +103,36 @@ public class JdbcDynamicTableSource
             builder.setFetchSize(readOptions.getFetchSize());
         }
         final JdbcDialect dialect = options.getDialect();
-        String query =
-                dialect.getSelectFromStatement(
-                        options.getTableName(),
-                        DataType.getFieldNames(physicalRowDataType).toArray(new String[0]),
-                        new String[0]);
-        if (readOptions.getPartitionColumnName().isPresent()) {
-            long lowerBound = readOptions.getPartitionLowerBound().get();
-            long upperBound = readOptions.getPartitionUpperBound().get();
-            int numPartitions = readOptions.getNumPartitions().get();
-            builder.setParametersProvider(
-                    new JdbcNumericBetweenParametersProvider(lowerBound, upperBound)
-                            .ofBatchNum(numPartitions));
-            query +=
-                    " WHERE "
-                            + dialect.quoteIdentifier(readOptions.getPartitionColumnName().get())
-                            + " BETWEEN ? AND ?";
+        if (readOptions.getQuery().isPresent()) {
+            Preconditions.checkArgument(
+                    !StringUtils.isNullOrWhitespaceOnly(readOptions.getQuery().get()),
+                    "read.query cant be null or whitespace only.");
+            builder.setQuery(readOptions.getQuery().get());
+        } else {
+            String query =
+                    dialect.getSelectFromStatement(
+                            options.getTableName(),
+                            DataType.getFieldNames(physicalRowDataType).toArray(new String[0]),
+                            new String[0]);
+            if (readOptions.getPartitionColumnName().isPresent()) {
+                long lowerBound = readOptions.getPartitionLowerBound().get();
+                long upperBound = readOptions.getPartitionUpperBound().get();
+                int numPartitions = readOptions.getNumPartitions().get();
+                builder.setParametersProvider(
+                        new JdbcNumericBetweenParametersProvider(lowerBound, upperBound)
+                                .ofBatchNum(numPartitions));
+                query +=
+                        " WHERE "
+                                + dialect.quoteIdentifier(
+                                        readOptions.getPartitionColumnName().get())
+                                + " BETWEEN ? AND ?";
+            }
+            if (limit >= 0) {
+                query = String.format("%s %s", query, dialect.getLimitClause(limit));
+            }
+            builder.setQuery(query);
         }
-        if (limit >= 0) {
-            query = String.format("%s %s", query, dialect.getLimitClause(limit));
-        }
-        builder.setQuery(query);
+
         final RowType rowType = (RowType) physicalRowDataType.getLogicalType();
         builder.setRowConverter(dialect.getRowConverter(rowType));
         builder.setRowDataTypeInfo(

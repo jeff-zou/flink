@@ -172,5 +172,12 @@ public class JdbcConnectorOptions {
                     .withDescription(
                             "cumulative insert which not replace with on duplicate key update,eg: =values(col1)+col1");
 
+    // read config options
+    public static final ConfigOption<String> READ_QUERY =
+            ConfigOptions.key("read.query")
+                    .stringType()
+                    .noDefaultValue()
+                    .withDescription("the sql for read data will be query in db.");
+
     private JdbcConnectorOptions() {}
 }

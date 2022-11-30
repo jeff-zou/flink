@@ -52,6 +52,7 @@ import static org.apache.flink.connector.jdbc.table.JdbcConnectorOptions.LOOKUP_
 import static org.apache.flink.connector.jdbc.table.JdbcConnectorOptions.LOOKUP_MAX_RETRIES;
 import static org.apache.flink.connector.jdbc.table.JdbcConnectorOptions.MAX_RETRY_TIMEOUT;
 import static org.apache.flink.connector.jdbc.table.JdbcConnectorOptions.PASSWORD;
+import static org.apache.flink.connector.jdbc.table.JdbcConnectorOptions.READ_QUERY;
 import static org.apache.flink.connector.jdbc.table.JdbcConnectorOptions.SCAN_AUTO_COMMIT;
 import static org.apache.flink.connector.jdbc.table.JdbcConnectorOptions.SCAN_FETCH_SIZE;
 import static org.apache.flink.connector.jdbc.table.JdbcConnectorOptions.SCAN_PARTITION_COLUMN;
@@ -148,6 +149,7 @@ public class JdbcDynamicTableFactory implements DynamicTableSourceFactory, Dynam
         }
         readableConfig.getOptional(SCAN_FETCH_SIZE).ifPresent(builder::setFetchSize);
         builder.setAutoCommit(readableConfig.get(SCAN_AUTO_COMMIT));
+        builder.setQuery(readableConfig.get(READ_QUERY));
         return builder.build();
     }
 
@@ -222,6 +224,7 @@ public class JdbcDynamicTableFactory implements DynamicTableSourceFactory, Dynam
         optionalOptions.add(SINK_PARALLELISM);
         optionalOptions.add(MAX_RETRY_TIMEOUT);
         optionalOptions.add(SINK_CUMULATIVE);
+        optionalOptions.add(READ_QUERY);
         return optionalOptions;
     }
 
@@ -243,7 +246,8 @@ public class JdbcDynamicTableFactory implements DynamicTableSourceFactory, Dynam
                         LOOKUP_CACHE_TTL,
                         LOOKUP_MAX_RETRIES,
                         LOOKUP_CACHE_MISSING_KEY,
-                        SINK_CUMULATIVE)
+                        SINK_CUMULATIVE,
+                        READ_QUERY)
                 .collect(Collectors.toSet());
     }
 
